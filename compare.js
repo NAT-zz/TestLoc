@@ -104,18 +104,37 @@ async function run() {
         gphdMap.delete(val)
     })
 
-    /** ===== 3. IN RA CÁC GPHĐ CÒN LẠI ===== */
+    /** ===== 3. GHI CÁC GPHĐ CÒN LẠI RA EXCEL ===== */
     if (gphdMap.size > 0) {
-        console.log('\n⚠️ GPHĐ KHÔNG TÌM THẤY TRONG FILE CHÍNH:')
+        const logWb = new ExcelJS.Workbook()
+        const logWs = logWb.addWorksheet('GPHĐ_KHÔNG_TRÙNG')
+
+        // Header
+        logWs.addRow(['Tên file', 'Số GPHĐ', 'Cơ sở'])
+
+        // Style header
+        logWs.getRow(1).font = { bold: true }
+        logWs.columns = [
+            { width: 25 },
+            { width: 25 },
+            { width: 40 }
+        ]
+
+        // Data
         for (const [val, rows] of gphdMap.entries()) {
             for (const r of rows) {
-                console.log(
-                    `- ${val} | File: ${r.file} | Cột 3: ${r.extra ?? '(trống)'}`
-                )
+                logWs.addRow([
+                    r.file,
+                    val,
+                    r.extra ?? '(trống)'
+                ])
             }
         }
+
+        await logWb.xlsx.writeFile('GPHD_KHONG_TRUNG.xlsx')
+        console.log('📄 Đã ghi file GPHD_KHONG_TRUNG.xlsx')
     } else {
-        console.log('\n✅ Tất cả GPHĐ đều đã được đối soát')
+        console.log('✅ Tất cả GPHĐ đều đã được đối soát')
     }
 
     await wb.xlsx.writeFile('output_SAFE.xlsx')
